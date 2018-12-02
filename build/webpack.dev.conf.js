@@ -1,29 +1,30 @@
-'use strict'
-const utils = require('./utils')
-const webpack = require('webpack')
-const config = require('../config')
-const merge = require('webpack-merge')
-const path = require('path')
-const baseWebpackConfig = require('./webpack.base.conf')
-const CopyWebpackPlugin = require('copy-webpack-plugin')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
-const portfinder = require('portfinder')
-const express = require('express')
+'use strict';
+const utils = require('./utils');
+const webpack = require('webpack');
+const config = require('../config');
+const merge = require('webpack-merge');
+const path = require('path');
+const baseWebpackConfig = require('./webpack.base.conf');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin');
+const portfinder = require('portfinder');
+const express = require('express');
 
-const HOST = process.env.HOST
-const PORT = process.env.PORT && Number(process.env.PORT)
+const HOST = process.env.HOST;
+const PORT = process.env.PORT && Number(process.env.PORT);
 
-var axios = require('axios')
+var axios = require('axios');
+const bodyParser = require('body-parser');
 // automatically open browser, if not set will be false
-var autoOpenBrowser = !!config.dev.autoOpenBrowser
+var autoOpenBrowser = !!config.dev.autoOpenBrowser;
 // Define HTTP proxies to your custom API backend
 // https://github.com/chimurai/http-proxy-middleware
-var proxyTable = config.dev.proxyTable
-var app = express()
-var apiRoutes = express.Router()
+var proxyTable = config.dev.proxyTable;
+var app = express();
+var apiRoutes = express.Router();
 
-app.use('/api', apiRoutes)
+app.use('/api', apiRoutes);
 
 const devWebpackConfig = merge(baseWebpackConfig, {
   module: {
@@ -39,10 +40,12 @@ const devWebpackConfig = merge(baseWebpackConfig, {
   devServer: {
     clientLogLevel: 'warning',
     historyApiFallback: {
-      rewrites: [{
-        from: /.*/,
-        to: path.posix.join(config.dev.assetsPublicPath, 'index.html')
-      }, ],
+      rewrites: [
+        {
+          from: /.*/,
+          to: path.posix.join(config.dev.assetsPublicPath, 'index.html')
+        }
+      ]
     },
     hot: true,
     contentBase: false, // since we use CopyWebpackPlugin.
@@ -50,33 +53,54 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     host: HOST || config.dev.host,
     port: PORT || config.dev.port,
     open: config.dev.autoOpenBrowser,
-    overlay: config.dev.errorOverlay ?
-      {
-        warnings: false,
-        errors: true
-      } :
-      false,
+    overlay: config.dev.errorOverlay
+      ? {
+          warnings: false,
+          errors: true
+        }
+      : false,
     publicPath: config.dev.assetsPublicPath,
     proxy: config.dev.proxyTable,
     quiet: true, // necessary for FriendlyErrorsPlugin
     watchOptions: {
-      poll: config.dev.poll,
+      poll: config.dev.poll
     },
     before(app) {
-      app.get('/api/getDiscList', function (req, res) {
-        var url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg'
-        axios.get(url, {
-          headers: {
-            referer: 'https://c.y.qq.com',
-            host: 'c.y.qq.com'
-          },
-          params: req.query
-        }).then((response) => {
-          res.json(response.data)
-        }).catch((e) => {
-          console.log(e)
-        })
-      })
+      app.get('/api/getDiscList', function(req, res) {
+        var url =
+          'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg';
+        axios
+          .get(url, {
+            headers: {
+              referer: 'https://c.y.qq.com',
+              host: 'c.y.qq.com'
+            },
+            params: req.query
+          })
+          .then(response => {
+            res.json(response.data);
+          })
+          .catch(e => {
+            console.log(e);
+          });
+      });
+      app.post('/api/getPurlUrl', bodyParser.json(), function(req, res) {
+        const url = 'https://u.y.qq.com/cgi-bin/musicu.fcg';
+        axios
+          .post(url, req.body, {
+            headers: {
+              referer: 'https://y.qq.com/',
+              origin: 'https://y.qq.com',
+              'Content-type': 'application/x-www-form-urlencoded'
+            }
+          })
+          .then(response => {
+            res.json(response.data);
+          })
+          .catch(e => {
+            console.log(e);
+          });
+      });
     }
   },
   plugins: [
@@ -93,36 +117,44 @@ const devWebpackConfig = merge(baseWebpackConfig, {
       inject: true
     }),
     // copy custom static assets
-    new CopyWebpackPlugin([{
-      from: path.resolve(__dirname, '../static'),
-      to: config.dev.assetsSubDirectory,
-      ignore: ['.*']
-    }])
+    new CopyWebpackPlugin([
+      {
+        from: path.resolve(__dirname, '../static'),
+        to: config.dev.assetsSubDirectory,
+        ignore: ['.*']
+      }
+    ])
   ]
-})
+});
 
 module.exports = new Promise((resolve, reject) => {
-  portfinder.basePort = process.env.PORT || config.dev.port
+  portfinder.basePort = process.env.PORT || config.dev.port;
   portfinder.getPort((err, port) => {
     if (err) {
-      reject(err)
+      reject(err);
     } else {
       // publish the new Port, necessary for e2e tests
-      process.env.PORT = port
+      process.env.PORT = port;
       // add port to devServer config
-      devWebpackConfig.devServer.port = port
+      devWebpackConfig.devServer.port = port;
 
       // Add FriendlyErrorsPlugin
-      devWebpackConfig.plugins.push(new FriendlyErrorsPlugin({
-        compilationSuccessInfo: {
-          messages: [`Your application is running here: http://${devWebpackConfig.devServer.host}:${port}`],
-        },
-        onErrors: config.dev.notifyOnErrors ?
-          utils.createNotifierCallback() :
-          undefined
-      }))
+      devWebpackConfig.plugins.push(
+        new FriendlyErrorsPlugin({
+          compilationSuccessInfo: {
+            messages: [
+              `Your application is running here: http://${
+                devWebpackConfig.devServer.host
+              }:${port}`
+            ]
+          },
+          onErrors: config.dev.notifyOnErrors
+            ? utils.createNotifierCallback()
+            : undefined
+        })
+      );
 
-      resolve(devWebpackConfig)
+      resolve(devWebpackConfig);
     }
-  })
-})
+  });
+});

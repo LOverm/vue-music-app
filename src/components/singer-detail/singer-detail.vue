@@ -1,14 +1,18 @@
 <template>
   <transition name="slide">
-    <music-list :title="title" :bg-image="bgImage" :songs="songs"></music-list>
+    <music-list
+      :title="title"
+      :bg-image="bgImage"
+      :songs="songs"
+    ></music-list>
   </transition>
 </template>
 
 <script type="text/ecmascript-6">
-import {mapGetters} from 'vuex';
+import { mapGetters } from 'vuex';
 import { getSingerDetail } from 'api/singer';
 import { ERR_OK } from 'api/config';
-import { createSong } from '../../common/js/song.js';
+import { createSong, processSongsUrl } from '../../common/js/song.js';
 import MusicList from '../music-list/music-list';
 export default {
   data() {
@@ -23,9 +27,7 @@ export default {
     bgImage() {
       return this.singer.avatar;
     },
-    ...mapGetters([
-      'singer'
-    ])
+    ...mapGetters(['singer'])
   },
   created() {
     this._getDetail();
@@ -36,16 +38,18 @@ export default {
       if (!this.singer.id) {
         this.$router.push('/singer');
       }
-      getSingerDetail(this.singer.id).then((res) => {
+      getSingerDetail(this.singer.id).then(res => {
         if (res.code === ERR_OK) {
-          this.songs = this._normalizeSongs(res.data.list);
+          processSongsUrl(this._normalizeSongs(res.data.list)).then(songs => {
+            this.songs = songs;
+          });
         }
       });
     },
     _normalizeSongs(list) {
       let ret = [];
-      list.forEach((item) => {
-        let {musicData} = item;
+      list.forEach(item => {
+        let { musicData } = item;
         if (musicData.songid && musicData.albumid) {
           ret.push(createSong(musicData));
         }
@@ -60,9 +64,10 @@ export default {
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
-  @import '../../common/stylus/variable'
-  .slide-enter-active, .slide-leave-active
-    transition all 0.3s
-  .slide-enter, .slide-leave-to
-    transform translate3d(100%, 0, 0)
+@import '../../common/stylus/variable'
+
+.slide-enter-active, .slide-leave-active
+  transition all 0.3s
+.slide-enter, .slide-leave-to
+  transform translate3d(100%, 0, 0)
 </style>
