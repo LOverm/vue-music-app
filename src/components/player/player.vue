@@ -59,7 +59,10 @@
           <div class="progress-wrapper">
             <span class="time time-l">{{format(currentTime)}}</span>
             <div class="progress-bar-wrapper">
-              <progress-bar :percent="percent"></progress-bar>
+              <progress-bar
+                :percent="percent"
+                @percentChange="onProgressBarChange"
+              ></progress-bar>
             </div>
             <span class="time time-r">{{format(currentSong.duration)}}</span>
           </div>
@@ -129,10 +132,16 @@
           ></p>
         </div>
         <div class="control">
-          <i
-            @click.stop="togglePlaying"
-            :class="miniIcon"
-          ></i>
+          <progress-circle
+            :radius="radius"
+            :percent="percent"
+          >
+            <i
+              @click.stop="togglePlaying"
+              class="icon-mini"
+              :class="miniIcon"
+            ></i>
+          </progress-circle>
         </div>
         <div class="control">
           <i class="icon-playlist"></i>
@@ -155,6 +164,7 @@ import { mapGetters, mapMutations } from 'vuex';
 import animations from 'create-keyframe-animation';
 import { prefixStyle } from '../../common/js/dom.js';
 import ProgressBar from '../../base/progress-bar/progess-bar';
+import ProgressCircle from '../../base/progress-circle/progress-circle';
 
 const transform = prefixStyle('transform');
 
@@ -162,7 +172,8 @@ export default {
   data() {
     return {
       songReady: false,
-      currentTime: 0
+      currentTime: 0,
+      radius: 32
     };
   },
   computed: {
@@ -303,6 +314,12 @@ export default {
       }
       return num;
     },
+    onProgressBarChange(percent) {
+      this.$refs.audio.currentTime = this.currentSong.duration * percent;
+      if (!this.playing) {
+        this.togglePlaying();
+      }
+    },
     ...mapMutations({
       setFullScreen: 'SET_FULL_SCREEN',
       setPlayingState: 'SET_PLAYING_STATE',
@@ -323,7 +340,8 @@ export default {
     }
   },
   components: {
-    ProgressBar
+    ProgressBar,
+    ProgressCircle
   }
 };
 </script>

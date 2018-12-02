@@ -2,6 +2,7 @@
   <div
     class="progress-bar"
     ref="progressBar"
+    @click="progressClick"
   >
     <div class="bar-inner">
       <div
@@ -11,6 +12,9 @@
       <div
         class="progress-btn-wrapper"
         ref="progressBtn"
+        @touchstart.prevent="progressTouchStart"
+        @touchmove.prevent="progressTouchMove"
+        @touchend.prevent="progressTouchEnd"
       >
         <div class="progress-btn"></div>
       </div>
@@ -33,12 +37,47 @@ export default {
   },
   watch: {
     percent(newPercent) {
-      if (newPercent >= 0) {
+      if (newPercent >= 0 && this.touch.initiated === false) {
         const barWidth = this.$refs.progressBar.clientWidth - progressBtnWidth;
         const offsetWidth = newPercent * barWidth;
-        this.$refs.progress.style.width = `${offsetWidth}px`;
-        this.$refs.progressBtn.style[transform] = `translate3d(${offsetWidth}px,0,0)`;
+        this._offset(offsetWidth);
       }
+    }
+  },
+  created() {
+    this.touch = {};
+  },
+  methods: {
+    progressTouchStart(e) {
+      this.touch.initiated = true;
+      this.touch.startX = e.touches[0].pageX;
+      this.touch.left = this.$refs.progress.clientWidth;
+    },
+    progressTouchMove(e) {
+      if (!this.touch.initiated) {
+        // eslint-disable-next-line no-useless-return
+        return;
+      }
+      const deltaX = e.touches[0].pageX - this.touch.startX;
+      const offsetWidth = Math.min(this.$refs.progressBar.clientWidth - progressBtnWidth, Math.max(0, this.touch.left + deltaX));
+      this._offset(offsetWidth);
+    },
+    progressTouchEnd(e) {
+      this.touch.initiated = false;
+      this._trigglePercent();
+    },
+    progressClick(e) {
+      this._offset(e.offsetX);
+      this._trigglePercent();
+    },
+    _offset(offsetWidth) {
+      this.$refs.progress.style.width = `${offsetWidth}px`;
+      this.$refs.progressBtn.style[transform] = `translate3d(${offsetWidth}px,0,0)`;
+    },
+    _trigglePercent() {
+      const barWidth = this.$refs.progressBar.clientWidth - progressBtnWidth;
+      const percent = this.$refs.progress.clientWidth / barWidth;
+      this.$emit('percentChange', percent);
     }
   }
 };
