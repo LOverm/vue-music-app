@@ -67,7 +67,11 @@ export default {
       this._trigglePercent();
     },
     progressClick(e) {
-      this._offset(e.offsetX);
+      const rect = this.$refs.progressBar.getBoundingClientRect();
+      const offsetWidth = e.pageX - rect.left;
+      this._offset(offsetWidth);
+      // e.offsetX获取不对
+      // this._offset(e.offsetX);
       this._trigglePercent();
     },
     _offset(offsetWidth) {
