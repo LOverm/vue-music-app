@@ -1,14 +1,33 @@
 export function shuffle(arr) {
-  let _arr = arr.slice();
+  const _arr = arr.slice()
   for (let index = 0; index < arr.length; index++) {
-    let j = getRandomInt(0, index);
-    let t = _arr[index];
-    _arr[index] = _arr[j];
-    _arr[j] = t;
+    const j = getRandomInt(0, index)
+    const t = _arr[index]
+    _arr[index] = _arr[j]
+    _arr[j] = t
   }
-  return _arr;
+  return _arr
 }
 
 function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
+  return Math.floor(Math.random() * (max - min + 1) + min)
+}
+
+/**
+ * 实现函数的防抖
+ * @param {传入函数} func
+ * @param {等待时间} wait
+ */
+export function debounce(func, wait) {
+  var timeout
+
+  return function() {
+    var context = this
+    var args = arguments
+
+    clearTimeout(timeout)
+    timeout = setTimeout(function() {
+      func.apply(context, args)
+    }, wait)
+  }
 }

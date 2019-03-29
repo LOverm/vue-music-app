@@ -1,18 +1,19 @@
 <template>
- <div class="m-header">
-   <div class="icon"></div>
-   <h1 class="text">Chicken Music</h1>
- </div>
+  <div class="m-header">
+    <div class="icon"></div>
+    <h1 class="text">Chicken Music</h1>
+  </div>
 </template>
 
 <script type="text/ecmascript-6">
 export default {
-};
+}
 </script>
 
 <style scoped lang="stylus">
-@import "../../common/stylus/variable"
-@import "../../common/stylus/mixin"
+@import '../../common/stylus/variable'
+@import '../../common/stylus/mixin'
+
 .m-header
   position relative
   height 44px
@@ -32,5 +33,5 @@ export default {
     display inline-block
     vertical-align top
     line-height 44px
-    font-size: $font-size-large
+    font-size $font-size-large
 </style>

@@ -47,6 +47,7 @@
         <song-list
           @select="selectItem"
           :songs="songs"
+          :rank="rank"
         ></song-list>
       </div>
       <div
@@ -60,16 +61,16 @@
 </template>
 
 <script type="text/ecmascript-6">
-import Scroll from '../../base/scroll/scroll';
-import SongList from '../../base/song-list/song-list';
-import Loading from '../../base/loading/loading';
-import { prefixStyle } from '../../common/js/dom.js';
-import { mapActions } from 'vuex';
-import { playlistMixin } from '../../common/js/mixin.js';
+import Scroll from '../../base/scroll/scroll'
+import SongList from '../../base/song-list/song-list'
+import Loading from '../../base/loading/loading'
+import { prefixStyle } from '../../common/js/dom.js'
+import { mapActions } from 'vuex'
+import { playlistMixin } from '../../common/js/mixin.js'
 
-const RESERVE_HEIGHT = 40;
-const transform = prefixStyle('transform');
-const backdrop = prefixStyle('backdrop-filter');
+const RESERVE_HEIGHT = 40
+const transform = prefixStyle('transform')
+const backdrop = prefixStyle('backdrop-filter')
 export default {
   mixins: [playlistMixin],
   props: {
@@ -79,54 +80,60 @@ export default {
     },
     songs: {
       type: Array,
-      default: null
+      default: function() {
+        return []
+      }
     },
     title: {
       type: String,
       default: ''
+    },
+    rank: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
     return {
       scrollY: 0
-    };
+    }
   },
   computed: {
     bgStyle() {
-      return `background-image:url(${this.bgImage})`;
+      return `background-image:url(${this.bgImage})`
     }
   },
   created() {
-    this.probeType = 3;
-    this.listenScroll = true;
+    this.probeType = 3
+    this.listenScroll = true
   },
   mounted() {
-    this.imageHeight = this.$refs.bgImage.clientHeight;
-    this.minTranslateY = -this.imageHeight + RESERVE_HEIGHT;
-    this.$refs.list.$el.style.top = `${this.imageHeight}px`;
+    this.imageHeight = this.$refs.bgImage.clientHeight
+    this.minTranslateY = -this.imageHeight + RESERVE_HEIGHT
+    this.$refs.list.$el.style.top = `${this.imageHeight}px`
   },
   methods: {
     handlePlayList(playList) {
-      const bottom = playList.length > 0 ? '60px' : '';
-      this.$refs.list.$el.style.bottom = bottom;
-      this.$refs.list.refresh();
+      const bottom = playList.length > 0 ? '60px' : ''
+      this.$refs.list.$el.style.bottom = bottom
+      this.$refs.list.refresh()
     },
     scroll(pos) {
-      this.scrollY = pos.y;
+      this.scrollY = pos.y
     },
     back() {
-      this.$router.back();
+      this.$router.back()
     },
     selectItem(item, index) {
       this.selectPlay({
         list: this.songs,
         index
-      });
+      })
     },
     random() {
       this.randomPlay({
         list: this.songs
-      });
+      })
     },
     ...mapActions([
       'selectPlay',
@@ -135,31 +142,31 @@ export default {
   },
   watch: {
     scrollY(newY) {
-      let translateY = Math.max(this.minTranslateY, newY);
-      let zindex = 0;
-      let scale = 1;
-      let blur = 0;
-      this.$refs.layer.style[transform] = `translate3d(0, ${translateY}px, 0)`;
-      const percent = Math.abs(newY / this.imageHeight);
+      const translateY = Math.max(this.minTranslateY, newY)
+      let zindex = 0
+      let scale = 1
+      let blur = 0
+      this.$refs.layer.style[transform] = `translate3d(0, ${translateY}px, 0)`
+      const percent = Math.abs(newY / this.imageHeight)
       if (newY > 0) {
-        scale = 1 + percent;
-        zindex = 10;
+        scale = 1 + percent
+        zindex = 10
       } else {
-        blur = Math.min(20 * percent, 20);
+        blur = Math.min(20 * percent, 20)
       }
-      this.$refs.filter.style[backdrop] = `blur(${blur}px)`;
+      this.$refs.filter.style[backdrop] = `blur(${blur}px)`
       if (newY < this.minTranslateY) {
-        zindex = 10;
-        this.$refs.bgImage.style.paddingTop = 0;
-        this.$refs.bgImage.style.height = `${RESERVE_HEIGHT}px`;
-        this.$refs.playBtn.style.display = 'none';
+        zindex = 10
+        this.$refs.bgImage.style.paddingTop = 0
+        this.$refs.bgImage.style.height = `${RESERVE_HEIGHT}px`
+        this.$refs.playBtn.style.display = 'none'
       } else {
-        this.$refs.bgImage.style.paddingTop = '70%';
-        this.$refs.bgImage.style.height = 0;
-        this.$refs.playBtn.style.display = '';
+        this.$refs.bgImage.style.paddingTop = '70%'
+        this.$refs.bgImage.style.height = 0
+        this.$refs.playBtn.style.display = ''
       }
-      this.$refs.bgImage.style.zIndex = zindex;
-      this.$refs.bgImage.style[transform] = `scale(${scale})`;
+      this.$refs.bgImage.style.zIndex = zindex
+      this.$refs.bgImage.style[transform] = `scale(${scale})`
     }
   },
   components: {
@@ -167,7 +174,7 @@ export default {
     SongList,
     Loading
   }
-};
+}
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">

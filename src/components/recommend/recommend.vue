@@ -34,6 +34,7 @@
               v-for="item in discList"
               class="item"
               :key="item.index"
+              @click="selectItem(item)"
             >
               <div class="icon">
                 <img
@@ -63,16 +64,18 @@
         <loading></loading>
       </div>
     </scroll>
+    <router-view></router-view>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-import { getRecommend, getDiscList } from 'api/recommend';
-import { ERR_OK } from 'api/config';
-import Slider from '../../base/slider/slider';
-import Scroll from '../../base/scroll/scroll';
-import Loading from '../../base/loading/loading';
-import { playlistMixin } from '../../common/js/mixin.js';
+import { getRecommend, getDiscList } from 'api/recommend'
+import { ERR_OK } from 'api/config'
+import Slider from '../../base/slider/slider'
+import Scroll from '../../base/scroll/scroll'
+import Loading from '../../base/loading/loading'
+import { playlistMixin } from '../../common/js/mixin.js'
+import { mapMutations } from 'vuex'
 
 export default {
   mixins: [playlistMixin],
@@ -80,45 +83,54 @@ export default {
     return {
       recommends: [],
       discList: []
-    };
+    }
   },
   created() {
-    this._getRecommend();
-    this._getDisctList();
+    this._getRecommend()
+    this._getDisctList()
   },
   methods: {
     handlePlayList(playList) {
-      const bottom = playList.length > 0 ? '60px' : '';
-      this.$refs.recommend.style.bottom = bottom;
-      this.$refs.scroll.refresh();
+      const bottom = playList.length > 0 ? '60px' : ''
+      this.$refs.recommend.style.bottom = bottom
+      this.$refs.scroll.refresh()
+    },
+    selectItem(item) {
+      this.$router.push({
+        path: `/recommend/${item.dissid}`
+      })
+      this.setDisc(item)
     },
     _getRecommend() {
       getRecommend().then((res) => {
         if (res.code === ERR_OK) {
-          this.recommends = res.data.slider;
+          this.recommends = res.data.slider
         }
-      });
+      })
     },
     _getDisctList() {
       getDiscList().then((res) => {
         if (res.code === ERR_OK) {
-          this.discList = res.data.list;
+          this.discList = res.data.list
         }
-      });
+      })
     },
     loadImage() {
       if (!this.checkLoaded) {
-        this.$refs.scroll.refresh();
-        this.checkLoaded = true;
+        this.$refs.scroll.refresh()
+        this.checkLoaded = true
       }
-    }
+    },
+    ...mapMutations({
+      setDisc: 'SET_DISC'
+    })
   },
   components: {
     Slider,
     Scroll,
     Loading
   }
-};
+}
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">

@@ -23,10 +23,10 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { prefixStyle } from '../../common/js/dom.js';
+import { prefixStyle } from '../../common/js/dom.js'
 
-const progressBtnWidth = 16;
-const transform = prefixStyle('transform');
+const progressBtnWidth = 16
+const transform = prefixStyle('transform')
 
 export default {
   props: {
@@ -38,53 +38,53 @@ export default {
   watch: {
     percent(newPercent) {
       if (newPercent >= 0 && this.touch.initiated === false) {
-        const barWidth = this.$refs.progressBar.clientWidth - progressBtnWidth;
-        const offsetWidth = newPercent * barWidth;
-        this._offset(offsetWidth);
+        const barWidth = this.$refs.progressBar.clientWidth - progressBtnWidth
+        const offsetWidth = newPercent * barWidth
+        this._offset(offsetWidth)
       }
     }
   },
   created() {
-    this.touch = {};
+    this.touch = {}
   },
   methods: {
     progressTouchStart(e) {
-      this.touch.initiated = true;
-      this.touch.startX = e.touches[0].pageX;
-      this.touch.left = this.$refs.progress.clientWidth;
+      this.touch.initiated = true
+      this.touch.startX = e.touches[0].pageX
+      this.touch.left = this.$refs.progress.clientWidth
     },
     progressTouchMove(e) {
       if (!this.touch.initiated) {
         // eslint-disable-next-line no-useless-return
-        return;
+        return
       }
-      const deltaX = e.touches[0].pageX - this.touch.startX;
-      const offsetWidth = Math.min(this.$refs.progressBar.clientWidth - progressBtnWidth, Math.max(0, this.touch.left + deltaX));
-      this._offset(offsetWidth);
+      const deltaX = e.touches[0].pageX - this.touch.startX
+      const offsetWidth = Math.min(this.$refs.progressBar.clientWidth - progressBtnWidth, Math.max(0, this.touch.left + deltaX))
+      this._offset(offsetWidth)
     },
     progressTouchEnd(e) {
-      this.touch.initiated = false;
-      this._trigglePercent();
+      this.touch.initiated = false
+      this._trigglePercent()
     },
     progressClick(e) {
-      const rect = this.$refs.progressBar.getBoundingClientRect();
-      const offsetWidth = e.pageX - rect.left;
-      this._offset(offsetWidth);
+      const rect = this.$refs.progressBar.getBoundingClientRect()
+      const offsetWidth = e.pageX - rect.left
+      this._offset(offsetWidth)
       // e.offsetX获取不对
       // this._offset(e.offsetX);
-      this._trigglePercent();
+      this._trigglePercent()
     },
     _offset(offsetWidth) {
-      this.$refs.progress.style.width = `${offsetWidth}px`;
-      this.$refs.progressBtn.style[transform] = `translate3d(${offsetWidth}px,0,0)`;
+      this.$refs.progress.style.width = `${offsetWidth}px`
+      this.$refs.progressBtn.style[transform] = `translate3d(${offsetWidth}px,0,0)`
     },
     _trigglePercent() {
-      const barWidth = this.$refs.progressBar.clientWidth - progressBtnWidth;
-      const percent = this.$refs.progress.clientWidth / barWidth;
-      this.$emit('percentChange', percent);
+      const barWidth = this.$refs.progressBar.clientWidth - progressBtnWidth
+      const percent = this.$refs.progress.clientWidth / barWidth
+      this.$emit('percentChange', percent)
     }
   }
-};
+}
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
