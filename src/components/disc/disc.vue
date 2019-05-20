@@ -13,7 +13,7 @@ import MusicList from '../music-list/music-list'
 import { mapGetters } from 'vuex'
 import { getSongList } from 'api/recommend'
 import { ERR_OK } from 'api/config'
-import { createSong, processSongsUrl, isValidMusic } from '../../common/js/song.js'
+import { createSong } from '@/common/js/song'
 export default {
   components: {
     MusicList
@@ -28,10 +28,10 @@ export default {
   },
   computed: {
     title() {
-      return this.disc.dissname
+      return this.disc.name
     },
     bgImage() {
-      return this.disc.imgurl
+      return this.disc.coverImgUrl
     },
     ...mapGetters([
       'disc'
@@ -39,25 +39,29 @@ export default {
   },
   methods: {
     _getSongList() {
-      if (!this.disc.dissid) {
+      if (!this.disc.id) {
         this.$router.push('/recommend')
         return
       }
-      getSongList(this.disc.dissid).then((res) => {
-        if (res.code === ERR_OK) {
-          const midList = this._normalizeSongs(res.cdlist[0].songlist)
-          processSongsUrl((midList)).then((songs) => {
-            this.songs = songs
-          })
+      getSongList(this.disc.id).then((res) => {
+        if (res.data.code === ERR_OK) {
+          const tracks = res.data.playlist.tracks
+          this.songs = this._processSongList(tracks)
         }
       })
     },
-    _normalizeSongs(list) {
+
+    _processSongList(songs) {
       const ret = []
-      list.forEach((musicData) => {
-        if (isValidMusic(musicData)) {
-          ret.push(createSong(musicData))
-        }
+      songs.forEach(song => {
+        const temp = {}
+        temp.id = song.id
+        temp.name = song.name
+        temp.artists = song.ar
+        temp.album = song.al
+        temp.duration = song.dt / 1000
+        temp.image = song.al.picUrl
+        ret.push(createSong(temp))
       })
       return ret
     }

@@ -19,19 +19,19 @@
             <img
               width="100"
               height="100"
-              v-lazy="item.picUrl"
+              v-lazy="item.coverImgUrl"
             />
           </div>
           <ul class="songlist">
             <li
               class="song"
-              v-for="(song,index) in item.songList"
+              v-for="(song,index) in item.topThree"
               :key="index"
             >
               <span>{{index
                 +
                 1}}</span>
-              <span>{{song.songname}}-{{song.singername}}</span>
+              <span>{{song.name}}-{{_getArtists(song.ar)}}</span>
             </li>
           </ul>
         </li>
@@ -51,7 +51,6 @@
 import Scroll from 'base/scroll/scroll'
 import Loading from 'base/loading/loading'
 import { getTopList } from 'api/rank'
-import { ERR_OK } from 'api/config'
 import { playlistMixin } from 'common/js/mixin'
 import { mapMutations } from 'vuex'
 
@@ -83,10 +82,20 @@ export default {
     },
     _getTopList() {
       getTopList().then((res) => {
-        if (res.code === ERR_OK) {
-          this.topList = res.data.topList
-        }
+        this.topList = res
+        let tracks = []
+        this.topList.forEach(item => {
+          tracks = item.tracks
+          item.topThree = tracks.slice(0, 3)
+        })
       })
+    },
+    _getArtists(arr) {
+      const artists = []
+      arr.forEach(item => {
+        artists.push(item.name)
+      })
+      return artists.join('/')
     },
     ...mapMutations({
       setTopList: 'SET_TOP_LIST'
@@ -133,7 +142,7 @@ export default {
         padding 0 20px
         height 100px
         overflow hidden
-        background $color-highlight-background
+        background $color-background
         color $color-text-d
         font-size $font-size-small
         .song

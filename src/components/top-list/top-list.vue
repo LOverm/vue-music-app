@@ -11,10 +11,8 @@
 
 <script type="text/ecmascript-6">
 import MusicList from '../music-list/music-list'
-import { getMusicList } from 'api/rank'
-import { ERR_OK } from 'api/config'
 import { mapGetters } from 'vuex'
-import { createSong, isValidMusic, processSongsUrl } from 'common/js/song'
+import { createSong } from '@/common/js/song'
 
 export default {
   data() {
@@ -25,13 +23,10 @@ export default {
   },
   computed: {
     title() {
-      return this.topList.topTitle
+      return this.topList.name
     },
     bgImage() {
-      if (this.songs.length) {
-        return this.songs[0].image
-      }
-      return ''
+      return this.topList.coverImgUrl
     },
     ...mapGetters(['topList'])
   },
@@ -44,21 +39,19 @@ export default {
         this.$router.push('/rank')
         return
       }
-      getMusicList(this.topList.id).then((res) => {
-        if (res.code === ERR_OK) {
-          processSongsUrl(this._normalizeSongs(res.songlist)).then((songs) => {
-            this.songs = songs
-          })
-        }
-      })
+      this.songs = this._processSongList(this.topList.tracks)
     },
-    _normalizeSongs(list) {
+    _processSongList(songs) {
       const ret = []
-      list.forEach((item) => {
-        const musicData = item.data
-        if (isValidMusic(musicData)) {
-          ret.push(createSong(musicData))
-        }
+      songs.forEach(song => {
+        const temp = {}
+        temp.id = song.id
+        temp.name = song.name
+        temp.artists = song.ar
+        temp.album = song.al
+        temp.duration = song.dt / 1000
+        temp.image = song.al.picUrl
+        ret.push(createSong(temp))
       })
       return ret
     }

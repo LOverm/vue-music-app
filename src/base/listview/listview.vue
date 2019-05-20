@@ -209,8 +209,8 @@ export default {
       line-height 30px
       padding-left 20px
       font-size $font-size-small
-      color $color-text-l
-      background $color-highlight-background
+      color $color-text-ll
+      background $color-theme
     .list-group-item
       display flex
       align-items center
@@ -238,7 +238,7 @@ export default {
     .item
       padding 3px
       line-height 1
-      color $color-text-l
+      color $color-text-ll
       font-size $font-size-small
       &.current
         color $color-theme
@@ -252,8 +252,8 @@ export default {
       line-height 30px
       padding-left 20px
       font-size $font-size-small
-      color $color-text-l
-      background $color-highlight-background
+      color $color-text-ll
+      background $color-theme
   .loading-container
     position absolute
     width 100%

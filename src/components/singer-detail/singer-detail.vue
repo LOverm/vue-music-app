@@ -12,8 +12,8 @@
 import { mapGetters } from 'vuex'
 import { getSingerDetail } from 'api/singer'
 import { ERR_OK } from 'api/config'
-import { createSong, processSongsUrl } from '../../common/js/song.js'
 import MusicList from '../music-list/music-list'
+import { createSong } from '@/common/js/song'
 export default {
   data() {
     return {
@@ -31,7 +31,6 @@ export default {
   },
   created() {
     this._getDetail()
-    console.log(this.singer)
   },
   methods: {
     _getDetail() {
@@ -39,20 +38,22 @@ export default {
         this.$router.push('/singer')
       }
       getSingerDetail(this.singer.id).then(res => {
-        if (res.code === ERR_OK) {
-          processSongsUrl(this._normalizeSongs(res.data.list)).then(songs => {
-            this.songs = songs
-          })
+        if (res.data.code === ERR_OK) {
+          this.songs = this._processSongList(res.data.hotSongs)
         }
       })
     },
-    _normalizeSongs(list) {
+    _processSongList(songs) {
       const ret = []
-      list.forEach(item => {
-        const { musicData } = item
-        if (musicData.songid && musicData.albumid) {
-          ret.push(createSong(musicData))
-        }
+      songs.forEach(song => {
+        const temp = {}
+        temp.id = song.id
+        temp.name = song.name
+        temp.artists = song.ar
+        temp.album = song.al
+        temp.duration = song.dt / 1000
+        temp.image = song.al.picUrl
+        ret.push(createSong(temp))
       })
       return ret
     }

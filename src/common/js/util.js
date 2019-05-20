@@ -1,3 +1,5 @@
+const pinyin = require('pinyin')
+
 export function shuffle(arr) {
   const _arr = arr.slice()
   for (let index = 0; index < arr.length; index++) {
@@ -30,4 +32,11 @@ export function debounce(func, wait) {
       func.apply(context, args)
     }, wait)
   }
+}
+
+export function getInitialLetter(word) {
+  const py = pinyin(word[0], {
+    style: pinyin.STYLE_FIRST_LETTER
+  })
+  return py[0][0].toUpperCase()
 }

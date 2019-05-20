@@ -45,12 +45,9 @@ import Loading from 'base/loading/loading'
 import NoResult from 'base/no-result/no-result'
 import { search } from 'api/search'
 import { ERR_OK } from 'api/config'
-import { createSong, isValidMusic, processSongsUrl } from 'common/js/song'
 import { mapMutations, mapActions } from 'vuex'
-import Singer from 'common/js/singer'
-
-const TYPE_SINGER = 'singer'
-const perpage = 20
+import { getSongUrl, getSongDetail } from 'api/song'
+import { createSong } from '@/common/js/song'
 
 export default {
   props: {
@@ -65,7 +62,8 @@ export default {
   },
   data() {
     return {
-      page: 1,
+      page: 0,
+      perpage: 30,
       pullup: true,
       beforeScroll: true,
       hasMore: true,
@@ -77,19 +75,17 @@ export default {
       this.$refs.suggest.refresh()
     },
     search() {
-      this.page = 1
+      this.page = 0
       this.hasMore = true
       this.$refs.suggest.scrollTo(0, 0)
-      search(this.query, this.page, this.showSinger).then(res => {
-        if (res.code === ERR_OK) {
-          search(this.query, this.page, this.showSinger, perpage).then((res) => {
-            if (res.code === ERR_OK) {
-              this._genResult(res.data).then((result) => {
-                this.result = result
-              })
-              this._checkMore(res.data)
-            }
-          })
+      search(this.query, this.page, this.perpage).then(res => {
+        if (res.data.code === ERR_OK) {
+          if (!res.data.result.songs) {
+            this.hasMore = false
+            return
+          }
+          this.result = res.data.result.songs
+          this._checkMore(res.data.result)
         }
       })
     },
@@ -98,70 +94,54 @@ export default {
         return
       }
       this.page++
-      search(this.query, this.page, this.showSinger, perpage).then((res) => {
-        if (res.code === ERR_OK) {
-          this._genResult(res.data).then((result) => {
-            this.result = this.result.concat(result)
-          })
-          this._checkMore(res.data)
+      search(this.query, this.page, this.perpage).then((res) => {
+        if (res.data.code === ERR_OK) {
+          this.result = this.result.concat(res.data.result.songs)
         }
       })
     },
     selectItem(item) {
-      if (item.type === TYPE_SINGER) {
-        const singer = new Singer({
-          id: item.singermid,
-          name: item.singername
+      const temp = {}
+      getSongDetail(item.id).then(res => {
+        if (res.data.code === ERR_OK) {
+          const song = res.data.songs[0]
+          temp.id = song.id
+          temp.name = song.name
+          temp.artists = song.ar
+          temp.album = song.al
+          temp.duration = song.dt / 1000
+          temp.image = song.al.picUrl
+          return createSong(temp)
+        }
+      }).then(song => {
+        getSongUrl(song.id).then(res => {
+          if (res.data.code === ERR_OK) {
+            song.url = res.data.data[0].url
+            this.insertSong(song)
+            this.$emit('select', song)
+          }
         })
-        this.$router.push({
-          path: `/search/${singer.id}`
-        })
-        this.setSinger(singer)
-      } else {
-        this.insertSong(item)
-      }
-      this.$emit('select', item)
+      })
     },
     getDisplayName(item) {
-      if (item.type === TYPE_SINGER) {
-        return item.singername
-      } else {
-        return `${item.name}-${item.singer}`
-      }
+      return item.name + this._getArtists(item.artists)
     },
     getIconCls(item) {
-      if (item.type === TYPE_SINGER) {
-        return 'icon-mine'
-      } else {
-        return 'icon-music'
-      }
+      return 'icon-music'
     },
     listScroll() {
       this.$emit('listScroll')
     },
-    _genResult(data) {
-      let ret = []
-      if (data.zhida && data.zhida.singerid && this.page === 1) {
-        // eslint-disable-next-line standard/object-curly-even-spacing
-        ret.push({ ...data.zhida, ...{ type: TYPE_SINGER }})
-      }
-      return processSongsUrl(this._normalizeSongs(data.song.list)).then((songs) => {
-        ret = ret.concat(songs)
-        return ret
+    _getArtists(arr) {
+      const artists = []
+      arr.forEach(item => {
+        artists.push(item.name)
       })
-    },
-    _normalizeSongs(list) {
-      const ret = []
-      list.forEach((musicData) => {
-        if (isValidMusic(musicData)) {
-          ret.push(createSong(musicData))
-        }
-      })
-      return ret
+      return artists.join('/')
     },
     _checkMore(data) {
-      const song = data.song
-      if (!song.list.length || (song.curnum + (song.curpage - 1) * perpage) >= song.totalnum) {
+      const songs = data.songs
+      if (!songs.length || this.result.length >= data.songCount) {
         this.hasMore = false
       }
     },

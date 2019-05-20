@@ -19,6 +19,7 @@ import Singer from '../../common/js/singer.js'
 import ListView from '../../base/listview/listview'
 import { mapMutations } from 'vuex'
 import { playlistMixin } from '../../common/js/mixin.js'
+import { getInitialLetter } from '@/common/js/util'
 
 const HOT_NAME = '热门'
 const HOT_SINGER_LEN = 10
@@ -47,8 +48,8 @@ export default {
     },
     _getSingerList() {
       getSingerList().then((res) => {
-        if (res.code === ERR_OK) {
-          this.singers = this._normalizeSinger(res.data.list)
+        if (res.data.code === ERR_OK) {
+          this.singers = this._normalizeSinger(res.data.list.artists)
         }
       })
     },
@@ -62,11 +63,12 @@ export default {
       list.forEach((item, index) => {
         if (index < HOT_SINGER_LEN) {
           map.hot.items.push(new Singer({
-            id: item.Fsinger_mid,
-            name: item.Fsinger_name
+            id: item.id,
+            name: item.name,
+            avatar: item.picUrl
           }))
         }
-        const key = item.Findex
+        const key = getInitialLetter(item.name)
         if (!map[key]) {
           map[key] = {
             title: key,
@@ -74,8 +76,9 @@ export default {
           }
         }
         map[key].items.push(new Singer({
-          id: item.Fsinger_mid,
-          name: item.Fsinger_name
+          id: item.id,
+          name: item.name,
+          avatar: item.picUrl
         }))
       })
       // 为了得到有序列表需要处理map

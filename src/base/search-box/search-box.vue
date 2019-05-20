@@ -62,7 +62,7 @@ export default {
   border-radius 6px
   .icon-search
     font-size 24px
-    color $color-background
+    color $color-theme
   .box
     flex 1
     margin 0 5px
@@ -75,5 +75,5 @@ export default {
       color $color-text-d
   .icon-dismiss
     font-size 16px
-    color $color-background
+    color $color-theme
 </style>

@@ -23,6 +23,8 @@
 </template>
 
 <script type="text/ecmascript-6">
+import { getSongUrl } from 'api/song'
+
 export default {
   props: {
     songs: {
@@ -36,10 +38,16 @@ export default {
   },
   methods: {
     getDesc(song) {
-      return `${song.singer}-${song.album}`
+      return `${song.artists}-${song.album.name}`
     },
     selectItem(item, index) {
-      this.$emit('select', item, index)
+      const id = item.id
+      getSongUrl(id).then(res => {
+        if (res.data.code === 200) {
+          item.url = res.data.data[0].url
+        }
+        this.$emit('select', item, index)
+      })
     },
     getRankCls(index) {
       if (index <= 2) {

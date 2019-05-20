@@ -34,7 +34,7 @@
           ></h1>
           <h2
             class="subtitle"
-            v-html="currentSong.singer"
+            v-html="currentSong.artists"
           ></h2>
         </div>
         <div
@@ -169,7 +169,7 @@
           ></h2>
           <p
             class="desc"
-            v-html="currentSong.singer"
+            v-html="currentSong.artists"
           ></p>
         </div>
         <div class="control">
@@ -196,6 +196,7 @@
     <playlist ref="playlist"></playlist>
 
     <audio
+      id="music-audio"
       ref="audio"
       :src="currentSong.url"
       @play="ready"
@@ -207,7 +208,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 import animations from 'create-keyframe-animation'
 import { prefixStyle } from '../../common/js/dom.js'
 import ProgressBar from '../../base/progress-bar/progess-bar'
@@ -235,7 +236,7 @@ export default {
   },
   computed: {
     percent() {
-      return this.currentTime / this.currentSong.duration
+      return this.currentTime / (this.currentSong.duration)
     },
     playIcon() {
       return this.playing ? 'icon-pause' : 'icon-play'
@@ -348,7 +349,11 @@ export default {
         if (index === this.playList.length) {
           index = 0
         }
-        this.setCurrentIndex(index)
+        this.setCurrentIndex(index).then(ret => {
+          if (ret === false) {
+            this.setCurrentIndex(index + 1)
+          }
+        })
         if (!this.playing) {
           this.togglePlaying()
         }
@@ -368,7 +373,11 @@ export default {
         if (index === -1) {
           index = this.playList.length - 1
         }
-        this.setCurrentIndex(index)
+        this.setCurrentIndex(index).then(ret => {
+          if (ret === false) {
+            this.setCurrentIndex(index - 1)
+          }
+        })
         if (!this.playing) {
           this.togglePlaying()
         }
@@ -520,10 +529,10 @@ export default {
     ...mapMutations({
       setFullScreen: 'SET_FULL_SCREEN',
       setPlayingState: 'SET_PLAYING_STATE',
-      setCurrentIndex: 'SET_CURRENT_INDEX',
       setPlayMode: 'SET_PLAY_MODE',
       setPlayList: 'SET_PLAY_LIST'
-    })
+    }),
+    ...mapActions(['setCurrentIndex'])
   },
   watch: {
     currentSong(newSong, oldSong) {

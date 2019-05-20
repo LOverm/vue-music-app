@@ -10,18 +10,18 @@
     >
       <div>
         <div
-          v-if="recommends.length"
+          v-if="banners.length"
           class="slider-wrapper"
         >
           <slider>
             <div
-              v-for="item in recommends"
+              v-for="item in banners"
               :key="item.id"
             >
-              <a :href="item.linkUrl">
+              <a>
                 <img
                   @load="loadImage"
-                  :src="item.picUrl"
+                  :src="item.imageUrl"
                 />
               </a>
             </div>
@@ -38,19 +38,19 @@
             >
               <div class="icon">
                 <img
-                  v-lazy="item.imgurl"
-                  width="60"
-                  height="60"
+                  v-lazy="item.coverImgUrl"
+                  width="80"
+                  height="80"
                 >
               </div>
               <div class="text">
                 <h2
                   class="name"
-                  v-html="item.creator.name"
+                  v-html="item.creator.nickname"
                 ></h2>
                 <p
                   class="desc"
-                  v-html="item.dissname"
+                  v-html="item.description"
                 ></p>
               </div>
             </li>
@@ -69,7 +69,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { getRecommend, getDiscList } from 'api/recommend'
+import { getBanner, getDiscList } from 'api/recommend'
 import { ERR_OK } from 'api/config'
 import Slider from '../../base/slider/slider'
 import Scroll from '../../base/scroll/scroll'
@@ -81,12 +81,12 @@ export default {
   mixins: [playlistMixin],
   data() {
     return {
-      recommends: [],
+      banners: [],
       discList: []
     }
   },
   created() {
-    this._getRecommend()
+    this._getBanner()
     this._getDisctList()
   },
   methods: {
@@ -97,21 +97,22 @@ export default {
     },
     selectItem(item) {
       this.$router.push({
-        path: `/recommend/${item.dissid}`
+        path: `/recommend/${item.id}`
       })
       this.setDisc(item)
     },
-    _getRecommend() {
-      getRecommend().then((res) => {
-        if (res.code === ERR_OK) {
-          this.recommends = res.data.slider
+    _getBanner() {
+      getBanner().then((res) => {
+        if (res.data.code === ERR_OK) {
+          this.banners = res.data.banners
+          this.banners = this.banners.slice(0, 5)
         }
       })
     },
     _getDisctList() {
       getDiscList().then((res) => {
-        if (res.code === ERR_OK) {
-          this.discList = res.data.list
+        if (res.data.code === ERR_OK) {
+          this.discList = res.data.playlists
         }
       })
     },
@@ -161,13 +162,16 @@ export default {
         align-items center
         padding 0 20px 20px 20px
         .icon
-          flex 0 0 60px
-          width 60px
+          flex 0 0 80px
+          width 80px
           padding-right 20px
+          img
+            border-radius 6px
         .text
           display flex
           flex-direction column
           justify-content center
+          flex-wrap nowrap
           flex 1
           line-height 20px
           overflow hidden
@@ -177,6 +181,13 @@ export default {
             color $color-text
           .desc
             color $color-text-d
+            display -webkit-box
+            text-overflow ellipsis
+            -webkit-box-orient vertical
+            line-clamp 1
+            white-space nowrap
+            -webkit-line-clamp 1
+            overflow hidden
     .loading-container
       position absolute
       width 100%

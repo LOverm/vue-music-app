@@ -1,6 +1,8 @@
 import * as types from './mutation-types'
 import { playMode } from '../common/js/config'
 import { shuffle } from '../common/js/util'
+import { getSongUrl } from 'api/song'
+import { ERR_OK } from 'api/config'
 import {
   saveSearch,
   clearSearch,
@@ -9,6 +11,22 @@ import {
   saveFavorite,
   deleteFavorite
 } from 'common/js/cache'
+
+export const setCurrentIndex = function({ commit, state }, index) {
+  const list = state.playList
+  return getSongUrl(list[index].id).then(res => {
+    if (res.data.code === ERR_OK) {
+      const songUrl = res.data.data[0].url
+      if (songUrl == null) {
+        return false
+      } else {
+        list[index].url = songUrl
+        commit(types.SET_CURRENT_INDEX, index)
+        return true
+      }
+    }
+  })
+}
 
 export const selectPlay = function({ commit, state }, { list, index }) {
   commit(types.SET_SEQUENCE_LIST, list)

@@ -22,12 +22,12 @@
             <h1 class="title">热门搜索</h1>
             <ul>
               <li
-                @click="addQuery(item.k)"
+                @click="addQuery(item.first)"
                 class="item"
                 v-for="item in hotKey"
                 :key="item.index"
               >
-                <span>{{item.k}}</span>
+                <span>{{item.first}}</span>
               </li>
             </ul>
           </div>
@@ -114,8 +114,8 @@ export default {
     },
     _getHotKey() {
       getHotKey().then((res) => {
-        if (res.code === ERR_OK) {
-          this.hotKey = res.data.hotkey.slice(0, 10)
+        if (res.data.code === ERR_OK) {
+          this.hotKey = res.data.result.hots
         }
       })
     },
@@ -160,7 +160,7 @@ export default {
         .title
           margin-bottom 20px
           font-size $font-size-medium
-          color $color-text-l
+          color $color-theme
         .item
           display inline-block
           padding 5px 10px
