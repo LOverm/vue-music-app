@@ -215,7 +215,6 @@ import ProgressBar from '../../base/progress-bar/progess-bar'
 import ProgressCircle from '../../base/progress-circle/progress-circle'
 import { playMode } from '../../common/js/config.js'
 import { shuffle } from '../../common/js/util.js'
-import Lyric from 'lyric-parser'
 import Scroll from '../../base/scroll/scroll'
 import Playlist from '../playlist/playlist'
 
@@ -425,31 +424,31 @@ export default {
       this._resetCurrentIndex(list)
       this.setPlayList(list)
     },
-    getLyric() {
-      this.currentSong.getLyric().then((lyric) => {
-        if (this.currentSong.lyric !== lyric) {
-          return
-        }
-        this.currentLyric = new Lyric(lyric, this.handleLyric)
-        if (this.playing) {
-          this.currentLyric.play()
-        }
-      }).catch(() => {
-        this.currentLyric = null
-        this.playingLyric = ''
-        this.currentLineNum = 0
-      })
-    },
-    handleLyric({ lineNum, txt }) {
-      this.currentLineNum = lineNum
-      if (lineNum > 5) {
-        const lineEl = this.$refs.lyricLine[lineNum - 5]
-        this.$refs.lyricList.scrollToElement(lineEl, 1000)
-      } else {
-        this.$refs.lyricList.scrollTo(0, 0, 1000)
-      }
-      this.playingLyric = txt
-    },
+    // getLyric() {
+    //   this.currentSong.getLyric().then((lyric) => {
+    //     if (this.currentSong.lyric !== lyric) {
+    //       return
+    //     }
+    //     this.currentLyric = new Lyric(lyric, this.handleLyric)
+    //     if (this.playing) {
+    //       this.currentLyric.play()
+    //     }
+    //   }).catch(() => {
+    //     this.currentLyric = null
+    //     this.playingLyric = ''
+    //     this.currentLineNum = 0
+    //   })
+    // },
+    // handleLyric({ lineNum, txt }) {
+    //   this.currentLineNum = lineNum
+    //   if (lineNum > 5) {
+    //     const lineEl = this.$refs.lyricLine[lineNum - 5]
+    //     this.$refs.lyricList.scrollToElement(lineEl, 1000)
+    //   } else {
+    //     this.$refs.lyricList.scrollTo(0, 0, 1000)
+    //   }
+    //   this.playingLyric = txt
+    // },
     _resetCurrentIndex(list) {
       const index = list.findIndex((item) => {
         return item.id === this.currentSong.id
@@ -697,11 +696,11 @@ export default {
           width 8px
           height 8px
           border-radius 50%
-          background $color-text-l
+          background $color-sub-theme
           &.active
             width 20px
             border-radius 5px
-            background $color-text-ll
+            background $color-theme
       .progress-wrapper
         display flex
         align-items center

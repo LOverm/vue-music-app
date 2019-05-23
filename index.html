@@ -14,8 +14,17 @@ user-scalable=no"
       http-equiv="Content-Security-Policy"
       content="upgrade-insecure-requests"
     />
-    <title>vue-music</title>
-  </head>
+    <title>MiaoMi Music</title>
+
+    <link rel="manifest" href="./manifest.json">
+
+    <!-- 针对safari（iOS）的添加到桌面功能进行相关设置 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="MiaoMi Music">
+    <link rel="apple-touch-icon" href="./icon_200x200.png">
+    <!--end-->
+
   <body>
     <div id="app"></div>
     <!-- built files will be auto injected -->
